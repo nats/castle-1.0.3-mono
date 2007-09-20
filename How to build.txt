@@ -1,0 +1,88 @@
+Everything should compile fine using NAnt 0.85 final. 
+You can find the latest version at http://nant.sourceforge.net/ 
+
+Anyway, the following are some useful tips if things go wrong for some reason.
+
+Where to start the build?
+=========================
+
+Use the default.build in the root directory. It compiles everything in the right order, copies dependencies and so on. 
+
+Simply type
+
+  > nant
+
+Database tests
+==============
+
+If you have MS SQL Server installed (default instance) just create two databases:
+
+- test
+- test2
+
+If not, and you want to run the database tests, you must set the connection string, dialect and driver through NAnt defines. Otherwise you can disable the tests (see below).
+
+The basic NHibernate settings can be set as NAnt arguments:
+
+- ar.dialect sets the NHibernate dialect
+
+    > -D:ar.dialect=NHibernate.Dialect.MsSql2000Dialect
+
+- ar.connection.driver_class sets the driver
+
+    > -D:ar.connection.driver_class=NHibernate.Driver.SqlClientDriver
+
+- ar.connection.connection_string{1,2} set the connection strings for the test and test2 databases
+
+    > -D:ar.connection.connection_string.1="Data Source=.;Initial Catalog=test;Integrated Security=SSPI;"
+    > -D:ar.connection.connection_string.2="Data Source=.;Initial Catalog=test2;Integrated Security=SSPI;"
+  
+Build options
+=============
+
+Disabling all tests
+-------------------
+
+  > nant -D:common.testrunner.enabled=false
+
+Selecting a different test framework (EXPERIMENTAL)
+-------------------
+
+NUnit (default)
+  > nant -D:testrunner=NUnit
+
+MbUnit:
+  > nant -D:testrunner=MbUnit
+
+N.B.
+MbUnit or NUnit needs to be on the path, otherwise NAnt's built-in nunit2 task will be used.
+
+Compiling a Debug version
+-------------------------
+
+  > nant -D:project.config=debug
+
+Compiling a version not strongly signed
+---------------------------------------
+
+  > nant -D:sign=false
+
+
+Allowing partial trust
+----------------------
+
+  > nant -D:assembly.allow-partially-trusted-callers=true
+
+
+Building the Castle MSI installer
+----------------------
+
+  > nant installer
+  
+You need to have installed Sandcastle, Sandcastle Help File Builder, HTML Help 1.x compiler, and WiX v3 for running task.
+
+
+More questions? 
+===============
+
+Please direct more questions to our devel mailing list or our forum at http://www.castleproject.org/
