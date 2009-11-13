@@ -37,7 +37,7 @@
 			<echo>Could not find "gacutil" to install Castle.MonoRail.TestSupport server to GAC.</echo>
 			<echo>To run the tests you have to install it manually: gacutil /i Castle.MonoRail.TestSupport</echo>
 		</if>
-		<if test="${property::exists( 'gacutil.file' )}">
+		<if test="${property::exists( 'gacutil.file' ) and common.testrunner.enabled}">
 			<exec program="${gacutil.file}" failonerror="true" verbose="true" workingdir="${build.dir}">
 				<arg value="/f" />
 				<arg value="/i" />
