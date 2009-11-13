@@ -2778,7 +2778,8 @@ namespace Castle.MonoRail.Framework.Helpers
 				{
 					return propInfo.GetValue(instance, null);
 				}
-				catch(TargetException)
+				// Mono 2.4 throws InvalidCastException instead of the correct TargetException
+				catch(Exception)
 				{
 					PropertyInfo tempProp = instance.GetType().GetProperty(Name);
 
