@@ -22,8 +22,14 @@ namespace Castle.MonoRail.WindsorExtension
 	{
 		public static IWindsorContainer ObtainContainer()
 		{
+            // Mono loads things in a different order to ASP.NET, which makes the way 1.0.3 works incompatible with mono
+			HttpApplication app = Castle.MonoRail.Framework.EngineContextModule.Application;
+
+			if (app == null)
+				throw new RailsException("Application instance is null");
+
 			IContainerAccessor containerAccessor =
-				HttpContext.Current.ApplicationInstance as IContainerAccessor;
+				app as IContainerAccessor;
 
 			if (containerAccessor == null)
 			{

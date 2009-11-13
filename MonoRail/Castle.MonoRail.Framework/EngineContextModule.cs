@@ -35,12 +35,19 @@ namespace Castle.MonoRail.Framework
 		private ILogger logger = NullLogger.Instance;
 
 		/// <summary>
+		/// On Mono, WindsorContainerAccessorUtil needs this due to the initialization order differing to Microsoft's implementation
+		/// </summary>
+		public static HttpApplication Application;
+
+		/// <summary>
 		/// Configures the framework, starts the services
 		/// and application hooks.
 		/// </summary>
 		/// <param name="context"></param>
 		public void Init(HttpApplication context)
 		{
+			Application = context;
+
 			if (context.Context.Error != null)
 			{
 				throw new Exception(
