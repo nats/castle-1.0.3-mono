@@ -131,8 +131,9 @@ namespace Castle.MonoRail.Framework.Helpers
 		/// <returns>An script block pointing to the given url.</returns>
 		protected string RenderScriptBlockToSource(string url)
 		{
-			return string.Format("<script type=\"text/javascript\" src=\"{0}.{1}?" + MonoRailVersion + "\"></script>",
-				Controller.Context.ApplicationPath + url, Controller.Context.UrlInfo.Extension);
+			// Modified to support extension-less URLs
+			return string.Format("<script type=\"text/javascript\" src=\"{0}{2}{1}?" + MonoRailVersion + "\"></script>",
+				Controller.Context.ApplicationPath + url, Controller.Context.UrlInfo.Extension, string.IsNullOrEmpty(Controller.Context.UrlInfo.Extension));
 		}
 
 		/// <summary>
