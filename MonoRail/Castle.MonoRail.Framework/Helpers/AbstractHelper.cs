@@ -133,7 +133,7 @@ namespace Castle.MonoRail.Framework.Helpers
 		{
 			// Modified to support extension-less URLs
 			return string.Format("<script type=\"text/javascript\" src=\"{0}{2}{1}?" + MonoRailVersion + "\"></script>",
-				Controller.Context.ApplicationPath + url, Controller.Context.UrlInfo.Extension, string.IsNullOrEmpty(Controller.Context.UrlInfo.Extension));
+				Controller.Context.ApplicationPath + url, Controller.Context.UrlInfo.Extension, !string.IsNullOrEmpty(Controller.Context.UrlInfo.Extension)?".":"");
 		}
 
 		/// <summary>
