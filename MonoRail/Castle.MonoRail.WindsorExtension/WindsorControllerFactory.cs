@@ -46,9 +46,10 @@ namespace Castle.MonoRail.WindsorExtension
 			Type implType = tree.GetController(urlInfo.Area, urlInfo.Controller);
 
 			if (implType == null)
-			{
+				implType = tree.GetController("", "rescues");
+
+			if (implType == null)
 				throw new ControllerNotFoundException(urlInfo);
-			}
 
 			return (Controller) container[implType];
 		}
