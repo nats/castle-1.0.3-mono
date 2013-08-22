@@ -27,7 +27,6 @@ namespace Castle.MonoRail.Framework.Views.NVelocity.CustomDirectives
 	public class SubSectionDirective : Directive
 	{
 		private readonly string name;
-		private NVelocityViewContextAdapter contextAdapter;
 		private INode savedNode;
 
 		public SubSectionDirective(String name)
@@ -72,26 +71,6 @@ namespace Castle.MonoRail.Framework.Views.NVelocity.CustomDirectives
 		/// </summary>
 		public override bool Render(IInternalContextAdapter context, TextWriter writer, INode node)
 		{
-			if (context == null)
-			{
-				throw new RailsException("context is null");
-			}
-
-			if (contextAdapter == null)
-			{
-				throw new RailsException("contextAdapter is null");
-			}
-
-			if (contextAdapter.ContextVars == null)
-			{
-				throw new RailsException("contextAdapter.ContextVars is null");
-			}
-
-			foreach(DictionaryEntry entry in contextAdapter.ContextVars)
-			{
-				context.Put(entry.Key.ToString(), entry.Value);
-			}
-
 			for(int i=0; i < savedNode.ChildrenCount; i++)
 			{
 				INode childNode = savedNode.GetChild(i);
@@ -101,9 +80,6 @@ namespace Castle.MonoRail.Framework.Views.NVelocity.CustomDirectives
 			return true;
 		}
 
-		internal NVelocityViewContextAdapter ContextAdapter
-		{
-			set { contextAdapter = value; }
-		}
+	
 	}
 }

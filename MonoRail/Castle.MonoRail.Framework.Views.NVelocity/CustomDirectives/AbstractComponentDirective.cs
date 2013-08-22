@@ -39,8 +39,6 @@ namespace Castle.MonoRail.Framework.Views.NVelocity.CustomDirectives
 		private readonly IViewComponentFactory viewComponentFactory;
 
 		private String componentName;
-		private ViewComponent component;
-		private NVelocityViewContextAdapter contextAdapter;
 		private IViewEngine viewEngine;
 		private INode compNameNode;
 
@@ -70,67 +68,82 @@ namespace Castle.MonoRail.Framework.Views.NVelocity.CustomDirectives
 
 		public override bool Render(IInternalContextAdapter context, TextWriter writer, INode node)
 		{
-			componentName = compNameNode.FirstToken.Image;
+		    componentName = compNameNode.FirstToken.Image;
 
-			if (componentName == null)
-			{
-				String message = String.Format("Could not obtain component name from the #{0} directive", Name);
-				throw new ViewComponentException(message);
-			}
-			
-			 if (componentName.StartsWith("$")) 
-			 {
-				String nodeContent = compNameNode.Literal.Trim('"', '\'');
-				SimpleNode inlineNode = rsvc.Parse(new StringReader(nodeContent), context.CurrentTemplateName, false);
+		    if (componentName == null)
+		    {
+		        String message = String.Format("Could not obtain component name from the #{0} directive", Name);
+		        throw new ViewComponentException(message);
+		    }
 
-				inlineNode.Init(context, rsvc);
-				componentName = (String) Evaluate(inlineNode, context);
-			}
+		    if (componentName.StartsWith("$"))
+		    {
+		        String nodeContent = compNameNode.Literal.Trim('"', '\'');
+		        SimpleNode inlineNode = rsvc.Parse(new StringReader(nodeContent), context.CurrentTemplateName,
+		                                                      false);
 
-			component = viewComponentFactory.Create(componentName);
+		        inlineNode.Init(context, rsvc);
+		        componentName = (String) Evaluate(inlineNode, context);
+		    }
 
-			ASTDirective directiveNode = (ASTDirective) node;
-			IViewRenderer renderer = (IViewRenderer) directiveNode.Directive;
+            ViewComponent component = viewComponentFactory.Create(componentName);
 
-			contextAdapter = new NVelocityViewContextAdapter(componentName, node, viewEngine, renderer);
-			contextAdapter.Context = context;
+		    
+		        ASTDirective directiveNode = (ASTDirective) node;
+		        IViewRenderer renderer = (IViewRenderer) directiveNode.Directive;
+                NVelocityViewContextAdapter contextAdapter = new NVelocityViewContextAdapter(componentName, node, viewEngine, renderer);
+		       contextAdapter.Context = context;
 
-			ProcessSubSections();
 
-			INode bodyNode = null;
 
-			IDictionary componentParams = CreateParameters(context, node);
+		        INode bodyNode = null;
 
-			if (node.ChildrenCount > 0)
-			{
-				bodyNode = node.GetChild(node.ChildrenCount - 1);
-			}
+		        IDictionary componentParams = CreateParameters(context, node);
 
-			contextAdapter.BodyNode = bodyNode;
-			contextAdapter.ComponentParams = componentParams;
-			contextAdapter.TextWriter = writer;
+		        if (node.ChildrenCount > 0)
+		        {
+		            bodyNode = node.GetChild(node.ChildrenCount - 1);
+		        }
 
-			IRailsEngineContext railsContext = MonoRailHttpHandler.CurrentContext;
+		        contextAdapter.BodyNode = bodyNode;
+		        contextAdapter.ComponentParams = componentParams;
+		        contextAdapter.TextWriter = writer;
+                IRailsEngineContext railsContext = MonoRailHttpHandler.CurrentContext;
 
-			const string ViewComponentContextKey = "viewcomponent";
+		        component.Init(railsContext, contextAdapter);
 
-			try
-			{
-				contextAdapter.ContextVars[ViewComponentContextKey] = component;
+		        ProcessSubSections(component, contextAdapter);
 
-				component.Init(railsContext, contextAdapter);
+		       
 
-				component.Render();
+		        const string ViewComponentContextKey = "viewcomponent";
+		        var previousComp = context[ViewComponentContextKey];
 
-				if (contextAdapter.ViewToRender != null)
-				{
-					return RenderComponentView(context, contextAdapter.ViewToRender, writer, contextAdapter);
-				}
-			}
-			finally
-			{
-				contextAdapter.ContextVars.Remove(ViewComponentContextKey);
-			}
+		        try
+		        {
+		            context[ViewComponentContextKey] = component;
+
+
+
+		            component.Render();
+
+		            if (contextAdapter.ViewToRender != null)
+		            {
+		                RenderComponentView(context, contextAdapter.ViewToRender, writer, contextAdapter);
+		            }
+		        }
+		        finally
+		        {
+		            if (previousComp != null)
+		            {
+		                context[ViewComponentContextKey] = previousComp;
+		            }
+		            else
+		            {
+		                context.Remove(ViewComponentContextKey);
+		            }
+		        }
+		    	
 
 			return true;
 		}
@@ -153,7 +166,7 @@ namespace Castle.MonoRail.Framework.Views.NVelocity.CustomDirectives
 			return RenderView(context, viewToRender, template, writer);
 		}
 
-		protected virtual void ProcessSubSections()
+        protected virtual void ProcessSubSections(ViewComponent component, NVelocityViewContextAdapter contextAdapter)
 		{
 		}
 
@@ -193,17 +206,7 @@ namespace Castle.MonoRail.Framework.Views.NVelocity.CustomDirectives
 			get { return componentName; }
 		}
 
-		protected ViewComponent Component
-		{
-			get { return component; }
-		}
-
-		protected NVelocityViewContextAdapter ContextAdapter
-		{
-			get { return contextAdapter; }
-		}
-
-		private IDictionary ProcessRemainingParams(int childrenCount, INode node, IInternalContextAdapter context)
+	    private IDictionary ProcessRemainingParams(int childrenCount, INode node, IInternalContextAdapter context)
 		{
 			IDictionary entries = new HybridDictionary(true);
 
