@@ -35,7 +35,6 @@ namespace NVelocity.Runtime.Parser.Node
 	{
 		private String methodName = "";
 		private int paramCount = 0;
-		private Object[] parameters;
 		private int paramArrayIndex = -1;
 
 		public ASTMethod(int id) : base(id)
@@ -68,7 +67,6 @@ namespace NVelocity.Runtime.Parser.Node
 
 			methodName = FirstToken.Image;
 			paramCount = ChildrenCount - 1;
-			parameters = new Object[paramCount];
 
 			return data;
 		}
@@ -82,6 +80,7 @@ namespace NVelocity.Runtime.Parser.Node
 		{
 			IDuck duck = o as IDuck;
 
+			Object[] parameters = new Object[paramCount];
 			Object[] methodArguments = parameters;
 
 			if (duck != null)
@@ -141,7 +140,7 @@ namespace NVelocity.Runtime.Parser.Node
 					{
 						method = (MethodInfo) icd.Thingy;
 
-						methodArguments = BuildMethodArgs(method, paramArrayIndex);
+						methodArguments = BuildMethodArgs(method, paramArrayIndex, parameters);
 					}
 					if (icd.Thingy is PropertyInfo)
 					{
@@ -155,7 +154,7 @@ namespace NVelocity.Runtime.Parser.Node
 					*  cache it
 					*/
 
-					Object obj = doIntrospection(context, c);
+					Object obj = doIntrospection(context, c, parameters);
 
 					if (obj is MethodInfo)
 					{
@@ -212,7 +211,7 @@ namespace NVelocity.Runtime.Parser.Node
 				{
 					if (!preparedAlready)
 					{
-						methodArguments = BuildMethodArgs(method);
+						methodArguments = BuildMethodArgs(method, parameters);
 					}
 
 					obj = method.Invoke(o, methodArguments);
@@ -286,7 +285,7 @@ namespace NVelocity.Runtime.Parser.Node
 		/// convience (compatability with Java version).  If there are no arguments,
 		/// it will also try to find a property with the same name (also flipping first character).
 		/// </summary>
-		private Object doIntrospection(IInternalContextAdapter context, Type data)
+		private Object doIntrospection(IInternalContextAdapter context, Type data, Object[] parameters)
 		{
 			/*
 			 *  Now the parameters have to be processed, there
@@ -343,7 +342,7 @@ namespace NVelocity.Runtime.Parser.Node
 			}
 		}
 
-		private object[] BuildMethodArgs(MethodInfo method, int paramArrayIndex)
+		private object[] BuildMethodArgs(MethodInfo method, int paramArrayIndex, Object[] parameters)
 		{
 			object[] methodArguments = parameters;
 			ParameterInfo[] methodArgs = method.GetParameters();
@@ -376,7 +375,7 @@ namespace NVelocity.Runtime.Parser.Node
 			return methodArguments;
 		}
 
-		private object[] BuildMethodArgs(MethodInfo method)
+		private object[] BuildMethodArgs(MethodInfo method, Object[] parameters)
 		{
 			ParameterInfo[] methodArgs = method.GetParameters();
 
@@ -395,7 +394,7 @@ namespace NVelocity.Runtime.Parser.Node
 
 			paramArrayIndex = indexOfParamArray;
 
-			return BuildMethodArgs(method, indexOfParamArray);
+			return BuildMethodArgs(method, indexOfParamArray, parameters);
 		}
 	}
 }
