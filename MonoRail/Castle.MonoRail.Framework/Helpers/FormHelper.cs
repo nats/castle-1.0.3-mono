@@ -2225,11 +2225,11 @@ namespace Castle.MonoRail.Framework.Helpers
 			{
 				rootInstance = Controller.PropertyBag[target];
 			}
-			if (rootInstance == null && (context == RequestContext.All || context == RequestContext.Flash))
+			if (rootInstance == null && (context == RequestContext.All || context == RequestContext.Flash) && Controller.Context.Flash != null)
 			{
 				rootInstance = Controller.Context.Flash[target];
 			}
-			if (rootInstance == null && (context == RequestContext.All || context == RequestContext.Session))
+			if (rootInstance == null && (context == RequestContext.All || context == RequestContext.Session) && Controller.Context.Session != null)
 			{
 				rootInstance = Controller.Context.Session[target];
 			}
